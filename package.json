@@ -1,0 +1,69 @@
+{
+  "homepage": "https://github.com/s-kostiantyn/task-manager-frontend.git",
+  "name": "test-task_work",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
+    "@szhsin/react-accordion": "^1.4.0",
+    "@tailwindcss/postcss": "^4.1.4",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.126",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
+    "axios": "^1.8.4",
+    "classnames": "^2.5.1",
+    "flowbite": "^3.1.2",
+    "flowbite-react": "^0.11.7",
+    "json-server": "^1.0.0-beta.3",
+    "lodash": "^4.17.21",
+    "lodash.debounce": "^4.0.8",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.5.0",
+    "react-scripts": "5.0.1",
+    "react-toastify": "^11.0.5",
+    "sass": "^1.86.3",
+    "test-task_work": "file:",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4",
+    "zustand": "^5.0.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/lodash.debounce": "^4.0.9",
+    "autoprefixer": "^10.4.21",
+    "gh-pages": "^6.3.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.3.2"
+  }
+}
