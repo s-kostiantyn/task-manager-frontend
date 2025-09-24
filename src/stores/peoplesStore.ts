@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
-import 'dotenv/config';
 import axios from "axios";
 import { PeopleState } from "../types/storeTypes/PeopleState";
 
