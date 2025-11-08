@@ -4,7 +4,9 @@ import axios from "axios";
 import { PeopleState } from "../types/storeTypes/PeopleState";
 
 const API_URL =
-  `${process.env.API_BACKEND}/peoples`;
+  `https://task-manager-backend-wkne.onrender.com/peoples`;
+
+  console.log(API_URL);
 
 export const usePeopleStore = create<PeopleState>((set) => ({
   users: [],
