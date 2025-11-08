@@ -30,65 +30,49 @@ export const AddTask: React.FC<Props> = ({
 
   const { addTaskToProject, loading } = useProjectStore();
 
-  const getTaskId = (tasks: Task[]) => {
-    if (!tasks.length) {
-      return 0;
-    }
-
-    const maxId = Math.max(...tasks.map((t) => t.id));
-
-    return maxId + 1;
+  const getTaskId = (tasks: Task[] = []) => {
+    if (!tasks.length) return 0;
+    return Math.max(...tasks.map((t) => t.id)) + 1;
   };
 
   const handleTaskAdd = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const normilizeTitle = task.title.trim();
-    const normilizeDesc = task.description.trim();
+    const title = task.title.trim();
+    const description = task.description.trim();
 
-    if (normilizeTitle && normilizeDesc && task.peoples.length !== 0) {
-      const today = new Date();
-
-      const day = String(today.getDate()).padStart(2, "0");
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const year = today.getFullYear();
-
-      const newTask: Task = {
-        id: getTaskId(project.tasks),
-        description: task.description,
-        title: task.title,
-        status: taskStatus,
-        date: `${month}/${day}/${year}`,
-        deadline: task.deadline,
-        peoples: [
-          ...project.peoples.filter((c) => task.peoples.includes(c.id)),
-        ],
-      };
-
-      addTaskToProject(project.id, newTask)
-        .then(() => {
-          setTask((prev) => ({
-            ...prev,
-            title: "",
-            description: "",
-            deadline: Deadlines.Day,
-            peoples: [],
-          }));
-          toast.success("Task added successfully");
-        })
-        .catch(() => {
-          toast.error("Failed to add task");
-        });
-    } else {
-      toast.error("Please fill all fields");
+    if (!title || !description || task.peoples.length === 0) {
+      toast.error("Please fill all fields and assign at least one person");
+      return;
     }
+
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const year = today.getFullYear();
+
+    const newTask: Task = {
+      id: getTaskId(project.tasks),
+      title,
+      description,
+      status: taskStatus,
+      date: `${month}/${day}/${year}`,
+      deadline: task.deadline,
+      peoples: (project.peoples || []).filter((p) => task.peoples.includes(p.id)),
+    };
+
+    addTaskToProject(project.id, newTask)
+      .then(() => {
+        setTask({ title: "", description: "", deadline: Deadlines.Day, peoples: [] });
+        toast.success("Task added successfully");
+        onModalIsOpen(false);
+      })
+      .catch(() => toast.error("Failed to add task"));
   };
 
   return (
     <>
-      {modalIsOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-10 z-40"></div>
-      )}
+      {modalIsOpen && <div className="fixed inset-0 bg-black bg-opacity-10 z-40"></div>}
 
       <div
         tabIndex={-1}
@@ -100,7 +84,7 @@ export const AddTask: React.FC<Props> = ({
         <div className="relative p-4 w-full max-w-2xl h-full md:h-auto">
           <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
             <div className="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-              <h3 className="text-lg text-gray-900 dark:text-white dark:text-white">
+              <h3 className="text-lg text-gray-900 dark:text-white">
                 Add "{taskStatus}" Task to "{project.title}"
               </h3>
               <button
@@ -126,129 +110,82 @@ export const AddTask: React.FC<Props> = ({
             </div>
 
             <form onSubmit={handleTaskAdd}>
-              <div className="mb-4 sm:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="task-title"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Task title
-                  </label>
-                  <input
-                    type="text"
-                    name="task-title"
-                    id="task-title"
-                    value={task.title}
-                    onChange={(e) =>
-                      setTask((prev) => ({ ...prev, title: e.target.value }))
-                    }
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Title"
-                  />
-                </div>
+              {/* Title */}
+              <div className="mb-4">
+                <label htmlFor="task-title" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Task title
+                </label>
+                <input
+                  type="text"
+                  id="task-title"
+                  value={task.title}
+                  onChange={(e) => setTask((prev) => ({ ...prev, title: e.target.value }))}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="Title"
+                />
+              </div>
 
-                <div className="mt-4">
-                  <label
-                    htmlFor="task-description"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Description
-                  </label>
-                  <textarea
-                    value={task.description}
-                    onChange={(e) =>
-                      setTask((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    id="task-description"
-                    className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Write a description..."
-                  ></textarea>
-                </div>
+              {/* Description */}
+              <div className="mb-4">
+                <label htmlFor="task-description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Description
+                </label>
+                <textarea
+                  id="task-description"
+                  value={task.description}
+                  onChange={(e) => setTask((prev) => ({ ...prev, description: e.target.value }))}
+                  className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="Write a description..."
+                />
+              </div>
 
-                <div className="mt-4">
-                  <h3 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    Deadline
-                  </h3>
-
-                  <div className="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    {Object.values(Deadlines).map((dl) => (
-                      <div
-                        key={dl}
-                        className="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600"
-                      >
-                        <div className="flex items-center ps-3">
-                          <input
-                            id={dl}
-                            type="radio"
-                            checked={dl === task.deadline}
-                            onChange={() =>
-                              setTask((prev) => ({ ...prev, deadline: dl }))
-                            }
-                            name="deadline"
-                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                          />
-                          <label
-                            htmlFor={dl}
-                            className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                          >
-                            {dl}
-                          </label>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="max-h-[200px] overflow-auto mt-4">
-                  {project.peoples.map((people) => {
-                    return (
-                      <div
-                        key={people.id + "people-task"}
-                        className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600"
-                      >
-                        <div className="flex items-center ps-3">
-                          <input
-                            id={`${people.id}`}
-                            type="checkbox"
-                            name="task-people"
-                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                            onChange={() => {
-                              if (task.peoples.includes(people.id)) {
-                                return setTask((prev) => ({
-                                  ...prev,
-                                  peoples: prev.peoples.filter(
-                                    (p) => p !== people.id
-                                  ),
-                                }));
-                              }
-                              return setTask((prev) => ({
-                                ...prev,
-                                peoples: [...prev.peoples, people.id],
-                              }));
-                            }}
-                          />
-
-                          <label
-                            htmlFor={`${people.id}`}
-                            className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                          >
-                            {people.firstName} {people.lastName}
-                          </label>
-                        </div>
-                      </div>
-                    );
-                  })}
+              {/* Deadline */}
+              <div className="mb-4">
+                <h3 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">Deadline</h3>
+                <div className="flex gap-4">
+                  {Object.values(Deadlines).map((dl) => (
+                    <label key={dl} className="flex items-center gap-2 text-gray-900 dark:text-gray-300">
+                      <input
+                        type="radio"
+                        checked={dl === task.deadline}
+                        onChange={() => setTask((prev) => ({ ...prev, deadline: dl }))}
+                        name="deadline"
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 dark:focus:ring-blue-600"
+                      />
+                      {dl}
+                    </label>
+                  ))}
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4">
+              {/* Peoples */}
+              <div className="mb-4 max-h-[200px] overflow-auto">
+                {(project.peoples || []).map((people) => (
+                  <label key={people.id} className="flex items-center gap-2 text-gray-900 dark:text-gray-300 mb-1">
+                    <input
+                      type="checkbox"
+                      checked={task.peoples.includes(people.id)}
+                      onChange={() => {
+                        setTask((prev) => ({
+                          ...prev,
+                          peoples: prev.peoples.includes(people.id)
+                            ? prev.peoples.filter((p) => p !== people.id)
+                            : [...prev.peoples, people.id],
+                        }));
+                      }}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-2 dark:focus:ring-blue-600"
+                    />
+                    {people.firstName} {people.lastName}
+                  </label>
+                ))}
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-4">
                 <button
                   disabled={loading}
                   type="submit"
-                  className="w-full flex justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                  className="flex-1 flex justify-center text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                 >
                   {loading ? <Spinner /> : "Add Task"}
                 </button>
@@ -256,7 +193,7 @@ export const AddTask: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={() => onModalIsOpen(false)}
-                  className="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                  className="flex-1 text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </button>

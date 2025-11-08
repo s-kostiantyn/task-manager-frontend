@@ -6,7 +6,7 @@ import { Task } from "../types/Task";
 import { Project } from "../types/Project";
 
 const API_URL =
-  `https://task-manager-backend-wkne.onrender.com/peoples`;
+  `https://task-manager-backend-wkne.onrender.com/projects`;
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
   projects: [],

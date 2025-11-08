@@ -18,8 +18,12 @@ export const Project: React.FC<Props> = ({ project }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalTypes>("delete");
 
-  const doneTasks = project.tasks.filter((t) => t.status === TaskStatuses.done);
-  const doneOn = (100 / project.tasks.length) * doneTasks.length;
+  // Використовуємо дефолтні порожні масиви, щоб уникнути помилок
+  const tasks = Array.isArray(project.tasks) ? project.tasks : [];
+  const peoples = Array.isArray(project.peoples) ? project.peoples : [];
+
+  const doneTasks = tasks.filter((t) => t.status === TaskStatuses.done);
+  const doneOn = tasks.length > 0 ? (100 / tasks.length) * doneTasks.length : 0;
 
   const [width, setWidth] = useState(0);
 
@@ -45,20 +49,20 @@ export const Project: React.FC<Props> = ({ project }) => {
     <>
       <div className="p-4 bg-white rounded shadow-sm border-gray-100 border-2 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
         <div className="flex items-start justify-between sm:items-center">
-          <div className="text-l">{project.title}</div>
+          <div className="text-l">{project.title || "No title"}</div>
 
           <div className="flex items-start gap-4 flex-col-reverse sm:flex-row sm:items-center">
             <p className="hidden text-gray-500 text-sm dark:text-gray-200 sm:block">
-              Tasks: {project.tasks.length}
+              Tasks: {tasks.length}
             </p>
 
             <p className="hidden text-gray-500 text-sm dark:text-gray-200 sm:block">
               Completed: {doneOn.toFixed()}%
             </p>
 
-            <div className="">
+            <div>
               {user &&
-                [Roles.Admin, Roles.ProjectManager].includes(user?.role) && (
+                [Roles.Admin, Roles.ProjectManager].includes(user.role) && (
                   <>
                     <button
                       onClick={handleModalDelete}
@@ -84,21 +88,20 @@ export const Project: React.FC<Props> = ({ project }) => {
 
         <div className="text-sm">
           <Accordion className="mt-4 dark:text-gray-200">
-            <AccordionItem className="" header="Details">
+            <AccordionItem header="Details">
               <div className="mt-2">
-                <h4 className="">
-                  Desctiptoin:{" "}
+                <h4>
+                  Description:{" "}
                   <span className="text-gray-600 dark:text-gray-300">
-                    {project.description}
+                    {project.description || "No description"}
                   </span>
                 </h4>
               </div>
 
               <div className="mt-2">
                 <p className="text-gray-500 text-sm dark:text-gray-200 sm:hidden">
-                  Tasks: {project.tasks.length}
+                  Tasks: {tasks.length}
                 </p>
-
                 <p className="text-gray-500 text-sm dark:text-gray-200 sm:hidden">
                   Completed: {doneOn.toFixed()}%
                 </p>
@@ -126,36 +129,39 @@ export const Project: React.FC<Props> = ({ project }) => {
               </div>
 
               <div className="mt-2">
-                <div className="">
-                  <p className="">
-                    Start:{" "}
-                    <span className="text-gray-600 dark:text-gray-300">
-                      {project.date}
-                    </span>
-                  </p>
-                  <p className="">
-                    Finish:{" "}
-                    <span className="text-gray-600 dark:text-gray-300">
-                      {project.dateEnd}
-                    </span>
-                  </p>
-                </div>
+                <p>
+                  Start:{" "}
+                  <span className="text-gray-600 dark:text-gray-300">
+                    {project.date || "N/A"}
+                  </span>
+                </p>
+                <p>
+                  Finish:{" "}
+                  <span className="text-gray-600 dark:text-gray-300">
+                    {project.dateEnd || "N/A"}
+                  </span>
+                </p>
               </div>
 
               <div className="mt-2">
-                <h4 className="">Peoples that working on this project</h4>
-
-                <ul className="">
-                  {project.peoples.map((people) => (
-                    <li
-                      className="flex gap-1 text-gray-600 dark:text-gray-300"
-                      key={people.id}
-                    >
-                      <p className="">{people.firstName}</p>
-                      <p className="">{people.lastName}</p>
-                    </li>
-                  ))}
-                </ul>
+                <h4>People working on this project</h4>
+                {peoples.length > 0 ? (
+                  <ul>
+                    {peoples.map((people) => (
+                      <li
+                        className="flex gap-1 text-gray-600 dark:text-gray-300"
+                        key={people.id}
+                      >
+                        <p>{people.firstName}</p>
+                        <p>{people.lastName}</p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400">
+                    No people assigned
+                  </p>
+                )}
               </div>
             </AccordionItem>
           </Accordion>
@@ -165,14 +171,14 @@ export const Project: React.FC<Props> = ({ project }) => {
           <div
             className="bg-blue-600 h-1.5 rounded-full transition-all duration-700 ease-in-out"
             style={{ width: `${width}%` }}
-          ></div>
+          />
         </div>
       </div>
 
       <Modal
         modalIsOpen={modalIsOpen}
         onModalOpen={setModalIsOpen}
-        title={project.title}
+        title={project.title || "No title"}
         type={modalType}
         formType={FormTypes.Project}
         datas={project}

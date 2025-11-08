@@ -16,46 +16,33 @@ type Props = {
 
 export const TaskBoard: React.FC<Props> = ({ project, filterBy, sortBy }) => {
   const { updateTaskOrderInProject } = useProjectStore();
-  const preparedTasks = getPreparedDatas<TaskType[], TaskStatuses | null>(
-    project.tasks,
-    { filterBy, sortBy }
-  );
+
+  const tasks = Array.isArray(project.tasks) ? project.tasks : [];
+
+  const preparedTasks = getPreparedDatas<TaskType[], TaskStatuses | null>(tasks, { filterBy, sortBy });
 
   const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
-
     if (!destination) return;
 
     const sourceStatus = source.droppableId;
     const destStatus = destination.droppableId;
-
-    if (sourceStatus === destStatus && source.index === destination.index) {
-      return;
-    }
+    if (sourceStatus === destStatus && source.index === destination.index) return;
 
     const [projectIdStr, taskIdStr] = draggableId.split("-");
     const projectId = +projectIdStr;
     const taskId = +taskIdStr;
 
-    const project = useProjectStore
-      .getState()
-      .projects.find((p) => p.id === projectId);
+    const currentProject = useProjectStore.getState().projects.find((p) => p.id === projectId);
+    if (!currentProject) return;
 
-    if (!project) {
-      console.error("Project not found");
-      return;
-    }
-
-    const updatedTasks = [...project.tasks];
+    const updatedTasks = Array.isArray(currentProject.tasks) ? [...currentProject.tasks] : [];
     const draggedTaskIndex = updatedTasks.findIndex((t) => t.id === taskId);
     const draggedTask = updatedTasks[draggedTaskIndex];
     if (!draggedTask) return;
 
     if (sourceStatus === destStatus) {
-      const tasksInStatus = updatedTasks.filter(
-        (t) => t.status === sourceStatus
-      );
-
+      const tasksInStatus = updatedTasks.filter((t) => t.status === sourceStatus);
       tasksInStatus.splice(source.index, 1);
       tasksInStatus.splice(destination.index, 0, draggedTask);
 
@@ -64,65 +51,33 @@ export const TaskBoard: React.FC<Props> = ({ project, filterBy, sortBy }) => {
           updatedTasks[idx] = tasksInStatus.shift()!;
         }
       });
-
-      updateTaskOrderInProject(project, updatedTasks)
-        .then(() => {
-          toast.success("Order updated successfully!");
-        })
-        .catch(() => {
-          toast.error("Failed to update the order");
-        });
     } else {
-      const updatedTask = {
-        ...draggedTask,
-        status: destStatus as TaskStatuses,
-      };
-
-      updatedTasks.splice(draggedTaskIndex, 1);
-      updatedTasks.push(updatedTask);
-
-      updateTaskOrderInProject(project, updatedTasks)
-        .then(() => {
-          toast.success("Status task updated successfully!");
-        })
-        .catch(() => {
-          toast.error("Failed to update status the task");
-        });
+      updatedTasks[draggedTaskIndex] = { ...draggedTask, status: destStatus as TaskStatuses };
     }
+
+    updateTaskOrderInProject(currentProject, updatedTasks)
+      .then(() => toast.success("Task updated successfully!"))
+      .catch(() => toast.error("Failed to update task"));
   };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="mt-8">
-        <header className="flex justify-between	items-center">
-          <h3 className="text-xl text-gray-700 dark:text-gray-100">
-            {project.title}
-          </h3>
-
-          <p className="text-gray-700 text-sm dark:text-gray-300">
-            Tasks: {project.tasks.length}
-          </p>
+        <header className="flex justify-between items-center">
+          <h3 className="text-xl text-gray-700 dark:text-gray-100">{project.title}</h3>
+          <p className="text-gray-700 text-sm dark:text-gray-300">Tasks: {tasks.length}</p>
         </header>
 
         <div className="flex flex-col gap-2 mt-4 sm:flex-row">
           {Object.values(TaskStatuses).map((panel) => (
             <Droppable droppableId={panel} key={panel}>
               {(provided) => (
-                <div
-                  className="basis-1/3 grow shrink-1"
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
+                <div className="basis-1/3 grow shrink-1" ref={provided.innerRef} {...provided.droppableProps}>
                   <h4 className="text-center p-3 bg-gray-100 text-gray-700 dark:text-gray-300 dark:bg-gray-700">
                     {panel}
                   </h4>
-
                   <div className="mt-3">
-                    <TasksList
-                      project={project}
-                      tasks={preparedTasks}
-                      taskStatus={panel}
-                    />
+                    <TasksList project={project} tasks={preparedTasks} taskStatus={panel} />
                     {provided.placeholder}
                   </div>
                 </div>
