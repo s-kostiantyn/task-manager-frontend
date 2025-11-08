@@ -4,7 +4,7 @@ A Kanban-style project management web application with authentication and role-b
 
 ## Live Demo
 
-[Task Manager](https://k-shestakov.github.io/task-manager)
+[Task Manager](https://task-manager-frontend-okw6.onrender.com)
 
 ## Technologies Used
 
@@ -14,7 +14,7 @@ A Kanban-style project management web application with authentication and role-b
 - **Routing**: react-router-dom
 - **Drag & Drop**: @hello-pangea/dnd
 - **Notifications**: react-toastify
-- **Backend**: json-server (hosted on [Railway](https://github.com/k-shestakov/task-manager-api))
+- **Backend**: json-server (hosted on [Render](https://github.com/s-kostiantyn/task-manager-backend))
 - **Version Control**: Git, GitHub
 
 ## How to Run the Project Locally
@@ -145,8 +145,8 @@ export interface People {
 
 ## Deployment
 
-- **Frontend** deployed via GitHub Pages:  
-  [Task Manager](https://k-shestakov.github.io/task-manager)
+- **Frontend** deployed on Render:  
+  [Task Manager](https://github.com/s-kostiantyn/task-manager-frontend)
 
-- **Backend API** hosted on Railway:  
-  [task-manager-api](https://github.com/k-shestakov/task-manager-api)
+- **Backend API** hosted on Render:  
+  [task-manager-api](https://github.com/s-kostiantyn/task-manager-backend)
